@@ -11,7 +11,7 @@ var sycnedFiles = {};
 exports.ensure = function(pio, state) {
 
     var response = {
-        ".status": "unknown"
+        ".status": "ready"
     };
 
     return pio.API.Q.fcall(function() {
@@ -20,7 +20,6 @@ exports.ensure = function(pio, state) {
             if (state["pio.cli.local"].verbose) {
                 console.log("Skip profile sync because 'pio.profileRegistryUri' not set!");
             }
-            response[".status"] = "ready";
             return;
         }
 
@@ -29,7 +28,6 @@ exports.ensure = function(pio, state) {
             if (state["pio.cli.local"].verbose) {
                 console.log("Skip profile sync because np config found for service 'pio.profile'!");
             }
-            response[".status"] = "ready";
             return;
         }
 
@@ -37,7 +35,6 @@ exports.ensure = function(pio, state) {
             if (state["pio.cli.local"].verbose) {
                 console.log("Skip profile sync because the 'PIO_PROFILE_KEY' environment variable is not set!");
             }
-            response[".status"] = "ready";
             return;
         }
 
@@ -45,7 +42,6 @@ exports.ensure = function(pio, state) {
             if (state["pio.cli.local"].verbose) {
                 console.log("Skip profile sync because the 'PIO_PROFILE_SECRET' environment variable is not set!");
             }
-            response[".status"] = "ready";
             return;
         }
 
@@ -53,7 +49,6 @@ exports.ensure = function(pio, state) {
             if (state["pio.cli.local"].verbose) {
                 console.log("Skip profile sync because no adapters declared!");
             }
-            response[".status"] = "ready";
             return;
         }
 
@@ -132,7 +127,6 @@ exports.ensure = function(pio, state) {
             if (FS.existsSync(file)) {
                 if (FS.existsSync(cachePath)) {
                     if (parseInt(FS.readFileSync(cachePath).toString()) >= Math.ceil(FS.statSync(file).mtime.getTime()/1000) ) {
-                        response[".status"] = "ready";
                         return;
                     }
                 }
@@ -140,7 +134,6 @@ exports.ensure = function(pio, state) {
                 return encrypt(FS.readFileSync(file)).then(function (encrypted) {
                     return adapter.upload(PATH.basename(file), encrypted).then(function () {
                         FS.outputFileSync(cachePath, Math.ceil(FS.statSync(file).mtime.getTime()/1000));
-                        response[".status"] = "ready";
                         return;
                     });
                 });
@@ -148,14 +141,12 @@ exports.ensure = function(pio, state) {
 
             return adapter.download(PATH.basename(file)).then(function (encrypted) {
                 if (!encrypted) {
-                    response[".status"] = "ready";
                     return;
                 }
 
                 return decrypt(encrypted).then(function (decrypted) {
                     FS.outputFileSync(file, decrypted);
                     FS.outputFileSync(cachePath, Math.ceil(FS.statSync(file).mtime.getTime()/1000));
-                    response[".status"] = "ready";
                     return;
                 });
             });
