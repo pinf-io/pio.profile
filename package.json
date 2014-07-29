@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "pm": "npm",
   "bin": {
-    "pio-profile-encrypt": "./bin/pio-profile-encrypt"
+    "pio-profile-encrypt": "./bin/pio-profile-encrypt",
+    "pio-profile-decrypt": "./bin/pio-profile-decrypt"
   },
   "dependencies": {
     "q": "~0.9.7",

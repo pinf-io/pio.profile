@@ -25,13 +25,19 @@ exports.decryptFile = function (filePath, options, callback) {
     }
 
     function decrypt(secret, encrypted, callback) {
-        encrypted = encrypted.split(":");
-        var secretHash = CRYPTO.createHash("sha256");
-        secretHash.update(secret);
-        var decrypt = CRYPTO.createDecipheriv('aes-256-cbc', secretHash.digest(), new Buffer(encrypted.shift(), 'hex'));
-        var decrypted = decrypt.update(new Buffer(encrypted.join(":"), 'hex').toString('binary'), 'binary', 'utf8');
-        decrypted += decrypt.final('utf8');
-        return callback(null, decrypted);
+        try {
+            encrypted = encrypted.split(":");
+            var secretHash = CRYPTO.createHash("sha256");
+            secretHash.update(secret);
+            var decrypt = CRYPTO.createDecipheriv('aes-256-cbc', secretHash.digest(), new Buffer(encrypted.shift(), 'hex'));
+            var decrypted = decrypt.update(new Buffer(encrypted.join(":"), 'hex').toString('binary'), 'binary', 'utf8');
+            decrypted += decrypt.final('utf8');
+            return callback(null, decrypted);
+        } catch(err) {
+            err.message += " (while decrypting)";
+            err.stack += "\n(while decrypting)";
+            return callback(err);
+        }
     }
 
     var waitfor = WAITFOR.serial(function (err) {
