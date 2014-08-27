@@ -5,6 +5,7 @@ const FS = require("fs-extra");
 const DEEPMERGE = require("deepmerge");
 const WAITFOR = require("waitfor");
 const ESCAPE_REGEXP = require("escape-regexp-component");
+const COMMANDER = require("commander");
 
 var DEBUG = false;
 
@@ -54,7 +55,7 @@ exports.decryptFile = function (filePath, options, callback) {
             }
             return process.env[name];
         }).join("+");
-        return waitfor(function (callback) {
+        waitfor(secret, m, function (secret, m, callback) {
             return decrypt(secret, m[2], function(err, decrypted) {
                 if (err) return callback(err);
                 if (options.debug) {
@@ -69,16 +70,31 @@ exports.decryptFile = function (filePath, options, callback) {
 }
 
 
-
 function main (callback) {
-    if (process.argv.length <= 2) {
-        return callback("Usage: pio-profile-decrypt <file-path>");
+
+    var program = new COMMANDER.Command();
+
+    program
+        .usage('[options] <file>')
+        .option("--format <name>", "How to show the output")
+        .parse(process.argv);
+
+    if (program.args.length < 1) {
+        program.outputHelp();
+        return callback();
     }
-    return exports.decryptFile(process.argv[2], {
+
+    return exports.decryptFile(program.args[0], {
         debug: DEBUG
     }, function (err, content) {
         if (err) return callback(err);
-        process.stdout.write(content);
+        if (program.format === "source/env") {
+            for (var name in JSON.parse(content).env) {
+                process.stdout.write('export ' + name + '="' + JSON.parse(content).env[name] + '"\n');
+            }
+        } else {
+            process.stdout.write(content);
+        }
         return callback(null);
     });
 }

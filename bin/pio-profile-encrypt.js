@@ -57,7 +57,7 @@ function main (callback) {
             }
             return process.env[name];
         }).join("+");
-        return waitfor(function (callback) {
+        waitfor(secret, m, function (secret, m, callback) {
             return encrypt(secret, m[2], function(err, encrypted) {
                 if (err) return callback(err);
                 console.log("Encrypted value: " + m[0]);
@@ -84,3 +84,4 @@ if (require.main === module) {
         process.exit(0);
     });
 }
+

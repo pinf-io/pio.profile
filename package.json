@@ -7,16 +7,17 @@
     "pio-profile-decrypt": "./bin/pio-profile-decrypt"
   },
   "dependencies": {
-    "q": "~0.9.7",
     "aws-sdk": "~2.0.4",
-    "waitfor": "~0.1.3",
-    "fs-extra": "~0.8.1",
+    "commander": "^2.3.0",
+    "deepmerge": "~0.2.7",
     "escape-regexp-component": "~1.0.2",
-    "deepmerge": "~0.2.7"
+    "fs-extra": "~0.8.1",
+    "q": "~0.9.7",
+    "waitfor": "~0.1.3"
   },
   "config": {
-      "pio.deploy.converter": {
-          "name": "nodejs-lib"
-      }
+    "pio.deploy.converter": {
+      "name": "nodejs-lib"
+    }
   }
 }
