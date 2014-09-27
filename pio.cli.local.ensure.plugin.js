@@ -77,8 +77,18 @@ exports.ensure = function(pio, state) {
         var adapter = new adapter.adapter(settings);
 
         var files = [
-            profilePath,
-            activatePath
+            {
+                name: "profile.json",
+                path: profilePath
+            },
+            {
+                name: "activate.sh",
+                path: activatePath
+            },
+            {
+                name: "ssh.key",
+                path: pio.getConfig("config").pio.keyPath
+            }
         ];
 
         if (state["pio.cli.local"].verbose) {
@@ -111,14 +121,16 @@ exports.ensure = function(pio, state) {
             });
         }
 
-        function checkFile (file) {
+        function checkFile (fileinfo) {
+
+            var file = fileinfo.path;
 
             if (sycnedFiles[file]) {
                 return;
             }
             sycnedFiles[file] = true;
 
-            var cachePath = PATH.join(workspaceRootPath, ".pio.cache/pio.profile", PATH.basename(file) + "~mtime");
+            var cachePath = PATH.join(workspaceRootPath, ".pio.cache/pio.profile", fileinfo.name + "~mtime");
 
             if (state["pio.cli.local"].verbose) {
                 console.log("Checking file '" + file + "' using cache path '" + cachePath + "'");
@@ -132,14 +144,14 @@ exports.ensure = function(pio, state) {
                 }
 
                 return encrypt(FS.readFileSync(file)).then(function (encrypted) {
-                    return adapter.upload(PATH.basename(file), encrypted).then(function () {
+                    return adapter.upload(fileinfo.name, encrypted).then(function () {
                         FS.outputFileSync(cachePath, Math.ceil(FS.statSync(file).mtime.getTime()/1000));
                         return;
                     });
                 });
             }
 
-            return adapter.download(PATH.basename(file)).then(function (encrypted) {
+            return adapter.download(fileinfo.name).then(function (encrypted) {
                 if (!encrypted) {
                     return;
                 }
