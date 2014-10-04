@@ -77,6 +77,8 @@ function main (callback) {
     program
         .usage('[options] <file>')
         .option("--format <name>", "How to show the output")
+        .option("--write-to <path>", "Write decrypted data to file")
+        .option("--overwrite-source", "Write decrypted data back to source file")
         .parse(process.argv);
 
     if (program.args.length < 1) {
@@ -88,14 +90,23 @@ function main (callback) {
         debug: DEBUG
     }, function (err, content) {
         if (err) return callback(err);
-        if (program.format === "source/env") {
-            for (var name in JSON.parse(content).env) {
-                process.stdout.write('export ' + name + '="' + JSON.parse(content).env[name] + '"\n');
-            }
+
+        if (program.writeTo) {
+            return FS.outputFile(program.writeTo, content, callback);
         } else {
-            process.stdout.write(content);
+            if (program.overwriteSource) {
+                return FS.outputFile(program.args[0], content, callback);
+            } else {
+                if (program.format === "source/env") {
+                    for (var name in JSON.parse(content).env) {
+                        process.stdout.write('export ' + name + '="' + JSON.parse(content).env[name] + '"\n');
+                    }
+                } else {
+                    process.stdout.write(content);
+                }
+                return callback(null);
+            }
         }
-        return callback(null);
     });
 }
 

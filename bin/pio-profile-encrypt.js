@@ -39,10 +39,16 @@ function main (callback) {
         });
     }
 
+    var found = 0;
+
     var waitfor = WAITFOR.serial(function (err) {
         if (err) return callback(err);
 
         FS.writeFileSync(filePath, content, "utf8");
+
+        if (found > 0) {
+            return callback("##############################\n\nACTION: We encrypted a value in '" + filePath + "' that must be included in the commit! Please add the change and commit again.\n\n##############################\n");
+        }
 
         return callback(null);
     });
@@ -60,6 +66,7 @@ function main (callback) {
         waitfor(secret, m, function (secret, m, callback) {
             return encrypt(secret, m[2], function(err, encrypted) {
                 if (err) return callback(err);
+                found += 1;
                 console.log("Encrypted value: " + m[0]);
                 content = content.replace(new RegExp(ESCAPE_REGEXP(m[0]), "g"), "[ENCRYPTED:" + m[1] + ":" + encrypted + "]");
                 return callback(null);
