@@ -1,12 +1,12 @@
 #!/bin/bash
+# Source https://github.com/bash-origin/bash.origin
+. "$HOME/.bash.origin"
+function init {
+	eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+	BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
+	local __BO_DIR__="$___TMP___"
 
-# @credit http://stackoverflow.com/a/246128/330439
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-BASE_PATH="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-node $BASE_PATH/pio-profile-encrypt.js $@
+  BO_run_node "$__BO_DIR__/pio-profile-encrypt.js $@"
+}
+init $@
