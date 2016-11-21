@@ -98,8 +98,13 @@ function main (callback) {
                 return FS.outputFile(program.args[0], content, callback);
             } else {
                 if (program.format === "source/env") {
-                    for (var name in JSON.parse(content).env) {
-                        process.stdout.write('export ' + name + '="' + JSON.parse(content).env[name] + '"\n');
+                    var env = JSON.parse(content).env;
+                    for (var name in env) {
+                        if (/^#/.test(name) && env[name] === "#") {
+                            // Ignore comment line.
+                        } else {
+                            process.stdout.write('export ' + name + '="' + env[name] + '"\n');
+                        }
                     }
                 } else {
                     process.stdout.write(content);
