@@ -5,24 +5,29 @@ const FS = require("fs-extra");
 const DEEPMERGE = require("deepmerge");
 const WAITFOR = require("waitfor");
 const ESCAPE_REGEXP = require("escape-regexp-component");
+const MINIMIST = require("minimist");
 
 
-function main (callback) {
-    if (process.argv.length <= 2) {
+const VERBOSE = !!process.env.VERBOSE;
+
+
+function main (ARGS, callback) {
+
+    if (ARGS._.length !== 1) {
         return callback("Usage: pio-profile-encrypt <file-path>");
     }
 
-    var filePath = process.argv[2];
+    var filePath = ARGS._[0];
 
     if (!FS.existsSync(filePath)) {
         return callback("No file at path '" + filePath + "'!");
     }
 
-    console.log("[pio-profile-encrypt] Processing file:", filePath);
+    if (VERBOSE) console.log("[pio-profile-encrypt] Processing file:", filePath);
 
     var content = FS.readFileSync(filePath, "utf8");
 
-    console.log("[pio-profile-encrypt] Looking for '[ENCRYPT:<env-keys>:value]' to encrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
+    if (VERBOSE) console.log("[pio-profile-encrypt] Looking for '[ENCRYPT:<env-keys>:value]' to encrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
 
     function encrypt(secret, decrypted, callback) {
         return CRYPTO.randomBytes(32, function (err, buffer) {
@@ -46,7 +51,10 @@ function main (callback) {
 
         FS.writeFileSync(filePath, content, "utf8");
 
-        if (found > 0) {
+        if (
+            found > 0 &&
+            ARGS.noexit !== true
+        ) {
             return callback("##############################\n\nACTION: We encrypted a value in '" + filePath + "' that must be included in the commit! Please add the change and commit again.\n\n##############################\n");
         }
 
@@ -67,7 +75,7 @@ function main (callback) {
             return encrypt(secret, m[2], function(err, encrypted) {
                 if (err) return callback(err);
                 found += 1;
-                console.log("Encrypted value: " + m[0]);
+                if (VERBOSE) console.log("Encrypted value: " + m[0]);
                 content = content.replace(new RegExp(ESCAPE_REGEXP(m[0]), "g"), "[ENCRYPTED:" + m[1] + ":" + encrypted + "]");
                 return callback(null);
             });
@@ -78,7 +86,14 @@ function main (callback) {
 
 
 if (require.main === module) {
-    main(function(err) {
+
+    const ARGS = MINIMIST(process.argv.slice(2), {
+        boolean: [
+            "noexit"
+        ]
+    });
+
+    main(ARGS, function(err) {
         if (err) {
             if (typeof err === "string") {
                 console.error((""+err));

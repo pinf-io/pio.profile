@@ -13,11 +13,11 @@ function init {
 
 
 		function runWithArgs {
-				BO_run_node "${OUR_BASE_DIR}/pio-profile-decrypt.js" $@
+				BO_run_silent_node "${OUR_BASE_DIR}/pio-profile-decrypt.js" $@
 		}
 
 		function sourceWithArgs {
-				eval $(BO_run_node "${OUR_BASE_DIR}/pio-profile-decrypt.js" --format "source/env" $@)
+				eval $(BO_run_silent_node "${OUR_BASE_DIR}/pio-profile-decrypt.js" --format "source/env" $@)
 		}
 
 
