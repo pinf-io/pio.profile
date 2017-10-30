@@ -78,6 +78,7 @@ function main (callback) {
         .usage('[options] <file>')
         .option("--format <name>", "How to show the output")
         .option("--write-to <path>", "Write decrypted data to file")
+        .option("--user <name>", "Include user variables")
         .option("--overwrite-source", "Write decrypted data back to source file")
         .parse(process.argv);
 
@@ -98,7 +99,20 @@ function main (callback) {
                 return FS.outputFile(program.args[0], content, callback);
             } else {
                 if (program.format === "source/env") {
-                    var env = JSON.parse(content).env;
+
+                    var parsed = JSON.parse(content);
+                    var env = parsed.env;
+
+                    if (
+                        program.user &&
+                        parsed.user &&
+                        parsed.user[program.user]
+                    ) {
+                        Object.keys(parsed.user[program.user]).forEach(function (name) {
+                            env[name] = parsed.user[program.user][name];
+                        });
+                    }
+
                     for (var name in env) {
                         if (/^#/.test(name) && env[name] === "#") {
                             // Ignore comment line.
