@@ -23,11 +23,11 @@ function main (ARGS, callback) {
         return callback("No file at path '" + filePath + "'!");
     }
 
-    if (VERBOSE) console.log("[pio-profile-encrypt] Processing file:", filePath);
+    if (VERBOSE) console.error("[pio-profile-encrypt] Processing file:", filePath);
 
     var content = FS.readFileSync(filePath, "utf8");
 
-    if (VERBOSE) console.log("[pio-profile-encrypt] Looking for '[ENCRYPT:<env-keys>:value]' to encrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
+    if (VERBOSE) console.error("[pio-profile-encrypt] Looking for '[ENCRYPT:<env-keys>:value]' to encrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
 
     function encrypt(secret, decrypted, callback) {
         return CRYPTO.randomBytes(32, function (err, buffer) {
@@ -75,7 +75,7 @@ function main (ARGS, callback) {
             return encrypt(secret, m[2], function(err, encrypted) {
                 if (err) return callback(err);
                 found += 1;
-                if (VERBOSE) console.log("Encrypted value: " + m[0]);
+                if (VERBOSE) console.error("Encrypted value: " + m[0]);
                 content = content.replace(new RegExp(ESCAPE_REGEXP(m[0]), "g"), "[ENCRYPTED:" + m[1] + ":" + encrypted + "]");
                 return callback(null);
             });

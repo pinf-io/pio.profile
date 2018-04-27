@@ -16,13 +16,13 @@ exports.decryptFile = function (filePath, options, callback) {
     }
 
     if (options.debug) {
-        console.log("[pio-profile-encrypt] Processing file:", filePath);
+        console.error("[pio-profile-encrypt] Processing file:", filePath);
     }
 
     var content = FS.readFileSync(filePath, "utf8");
 
     if (options.debug) {
-        console.log("[pio-profile-encrypt] Looking for '[ENCRYPTED:<env-keys>:iv:encrypted]' to decrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
+        console.error("[pio-profile-encrypt] Looking for '[ENCRYPTED:<env-keys>:iv:encrypted]' to decrypt using secret '<env-keys>' (e.g. 'PIO_SEED_SALT+PIO_SEED_KEY')");
     }
 
     function decrypt(secret, encrypted, callback) {
@@ -59,7 +59,7 @@ exports.decryptFile = function (filePath, options, callback) {
             return decrypt(secret, m[2], function(err, decrypted) {
                 if (err) return callback(err);
                 if (options.debug) {
-                    console.log("Decrypted value: " + m[0]);
+                    console.error("Decrypted value: " + m[0]);
                 }
                 content = content.replace(new RegExp(ESCAPE_REGEXP(m[0]), "g"), decrypted);
                 return callback(null);

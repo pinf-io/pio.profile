@@ -36,5 +36,5 @@ try {
 	FS.unlinkSync(preCommitPath);
 } catch(err) {}
 
-console.log("Linking '" + scriptPath + "' to '" + preCommitPath + "'");
+console.error("Linking '" + scriptPath + "' to '" + preCommitPath + "'");
 FS.symlinkSync(scriptPath, preCommitPath);
